@@ -120,3 +120,97 @@ class AssessmentTorchDataset(Dataset):
 
         y = torch.tensor(p.label, dtype=torch.long)
         return {"rgb": rgb, "lidar": lidar, "y": y}
+
+import numpy as np
+from typing import List
+
+def stratified_subsample(pairs: List[PairRecord], frac: float = 0.10, seed: int = 42) -> List[PairRecord]:
+    rng = np.random.default_rng(seed)
+
+    cubes   = [p for p in pairs if p.class_name == "cubes"]
+    spheres = [p for p in pairs if p.class_name == "spheres"]
+
+    k_c = max(1, int(round(len(cubes) * frac)))
+    k_s = max(1, int(round(len(spheres) * frac)))
+
+    cubes_sel = rng.choice(len(cubes), size=k_c, replace=False)
+    sph_sel   = rng.choice(len(spheres), size=k_s, replace=False)
+
+    out = [cubes[i] for i in cubes_sel] + [spheres[i] for i in sph_sel]
+    rng.shuffle(out)
+    return out
+
+
+
+import fiftyone as fo
+import numpy as np
+from pathlib import Path
+from PIL import Image
+
+def lidar_to_png(lidar_npy: Path, out_dir: Path) -> Path:
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    arr = np.load(lidar_npy)
+    # Reduce to 2D for visualization
+    if arr.ndim == 3:
+        # if (H,W,C) or (C,H,W), take first channel safely
+        if arr.shape[0] in (1,2,3,4) and arr.shape[1] != arr.shape[0]:
+            arr2 = arr[0]
+        else:
+            arr2 = arr[..., 0]
+    elif arr.ndim == 2:
+        arr2 = arr
+    else:
+        raise ValueError(f"Unexpected LiDAR shape: {arr.shape} for {lidar_npy}")
+
+    # Normalize to 0..255 for PNG preview
+    a = arr2.astype(np.float32)
+    lo, hi = np.nanpercentile(a, (1, 99))
+    if hi <= lo:
+        lo, hi = float(np.nanmin(a)), float(np.nanmax(a) + 1e-6)
+    a = np.clip((a - lo) / (hi - lo), 0, 1)
+    img = (a * 255).astype(np.uint8)
+
+    out_path = out_dir / f"{lidar_npy.stem}.png"
+    Image.fromarray(img, mode="L").save(out_path)
+    return out_path
+
+def build_grouped_dataset(name: str, pairs, group_field="group", overwrite=True):
+    if overwrite and name in fo.list_datasets():
+        fo.delete_dataset(name)
+
+    ds = fo.Dataset(name)
+    ds.add_group_field(group_field, default="rgb")
+
+    preview_dir = Path("/content/lidar_previews")  # fast local previews in Colab
+
+    for p in pairs:
+        # make LiDAR preview PNG for the App
+        lidar_png = lidar_to_png(p.lidar_path, preview_dir)
+
+        rgb = fo.Sample(
+            filepath=str(p.rgb_path),
+            ground_truth=fo.Classification(label="cube" if p.class_name == "cubes" else "sphere"),
+            pair_id=p.pair_id,
+            class_name=p.class_name,
+            rgb_path=str(p.rgb_path),
+            lidar_npy_path=str(p.lidar_path),
+        )
+
+        lidar = fo.Sample(
+            filepath=str(lidar_png),
+            ground_truth=fo.Classification(label="cube" if p.class_name == "cubes" else "sphere"),
+            pair_id=p.pair_id,
+            class_name=p.class_name,
+            rgb_path=str(p.rgb_path),
+            lidar_npy_path=str(p.lidar_path),
+        )
+
+        g = fo.Group()
+        rgb[group_field] = g.element("rgb")
+        lidar[group_field] = g.element("lidar")
+
+        ds.add_samples([rgb, lidar])
+
+    ds.save()
+    return ds
