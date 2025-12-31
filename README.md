@@ -75,7 +75,7 @@ Resource Usage: Parameter counts and training times are comparable, but Max-Pool
 
 pip install -r requirements.txt
 
-Dependencies: PyTorch, NumPy, scikit-learn, and Weights & Biases (wandb).
+
 ```
 
 Project Structure
