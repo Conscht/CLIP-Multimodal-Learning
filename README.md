@@ -71,10 +71,10 @@ Best Model: The Intermediate Hadamard Fusion + Max-Pooling architecture achieved
 Resource Usage: Parameter counts and training times are comparable, but Max-Pooling variants require significantly more GPU memory.
 
 ## Getting Started
-Installation
-Bash```
+
 
 pip install -r requirements.txt
+
 Dependencies: PyTorch, NumPy, scikit-learn, and Weights & Biases (wandb).
 ```
 
@@ -90,7 +90,7 @@ Project Structure
 ├── checkpoints/       # Saved .pt models
 ├── results/           # metrics.csv logs
 └── requirements.txt
-
+```
 ##  Usage
 To train a specific configuration, you must simply 
 1. adjust the dataset path 
