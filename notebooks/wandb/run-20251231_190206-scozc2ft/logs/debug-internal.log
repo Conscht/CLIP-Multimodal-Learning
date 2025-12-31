@@ -1,0 +1,12 @@
+{"time":"2025-12-31T19:02:06.8281715+01:00","level":"INFO","msg":"stream: starting","core version":"0.23.1"}
+{"time":"2025-12-31T19:02:07.2079994+01:00","level":"INFO","msg":"stream: created new stream","id":"scozc2ft"}
+{"time":"2025-12-31T19:02:07.2085411+01:00","level":"INFO","msg":"handler: started","stream_id":"scozc2ft"}
+{"time":"2025-12-31T19:02:07.2367689+01:00","level":"INFO","msg":"stream: started","id":"scozc2ft"}
+{"time":"2025-12-31T19:02:07.2367689+01:00","level":"INFO","msg":"writer: started","stream_id":"scozc2ft"}
+{"time":"2025-12-31T19:02:07.2367689+01:00","level":"INFO","msg":"sender: started","stream_id":"scozc2ft"}
+{"time":"2025-12-31T19:02:11.1761037+01:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-12-31T19:02:11.4508284+01:00","level":"INFO","msg":"handler: operation stats","stats":{}}
+{"time":"2025-12-31T19:02:11.4809775+01:00","level":"INFO","msg":"stream: closing","id":"scozc2ft"}
+{"time":"2025-12-31T19:02:11.4814865+01:00","level":"INFO","msg":"handler: closed","stream_id":"scozc2ft"}
+{"time":"2025-12-31T19:02:11.4926854+01:00","level":"INFO","msg":"sender: closed","stream_id":"scozc2ft"}
+{"time":"2025-12-31T19:02:11.4938846+01:00","level":"INFO","msg":"stream: closed","id":"scozc2ft"}

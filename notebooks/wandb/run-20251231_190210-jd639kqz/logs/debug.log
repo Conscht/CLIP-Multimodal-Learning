@@ -1,0 +1,22 @@
+2025-12-31 19:02:10,358 INFO    MainThread:27200 [wandb_init.py:setup_run_log_directory():714] Logging user logs to g:\My Drive\Hands-on-CV-Project2\notebooks\wandb\run-20251231_190210-jd639kqz\logs\debug.log
+2025-12-31 19:02:10,366 INFO    MainThread:27200 [wandb_init.py:setup_run_log_directory():715] Logging internal logs to g:\My Drive\Hands-on-CV-Project2\notebooks\wandb\run-20251231_190210-jd639kqz\logs\debug-internal.log
+2025-12-31 19:02:10,366 INFO    MainThread:27200 [wandb_init.py:init():841] calling init triggers
+2025-12-31 19:02:10,366 INFO    MainThread:27200 [wandb_init.py:init():846] wandb.init called with sweep_config: {}
+config: {'_wandb': {}}
+2025-12-31 19:02:11,480 INFO    MainThread:27200 [wandb_init.py:init():889] starting backend
+2025-12-31 19:02:11,482 INFO    MainThread:27200 [wandb_init.py:init():892] sending inform_init request
+2025-12-31 19:02:11,505 INFO    MainThread:27200 [wandb_init.py:init():900] backend started and connected
+2025-12-31 19:02:11,526 INFO    MainThread:27200 [wandb_run.py:_label_probe_notebook():1334] probe notebook
+2025-12-31 19:02:11,576 INFO    MainThread:27200 [wandb_init.py:init():970] updated telemetry
+2025-12-31 19:02:11,834 INFO    MainThread:27200 [wandb_init.py:init():994] communicating run to backend with 90.0 second timeout
+2025-12-31 19:02:12,600 INFO    MainThread:27200 [wandb_init.py:init():1041] starting run threads in backend
+2025-12-31 19:02:14,323 INFO    MainThread:27200 [wandb_run.py:_console_start():2521] atexit reg
+2025-12-31 19:02:14,326 INFO    MainThread:27200 [wandb_run.py:_redirect():2369] redirect: wrap_raw
+2025-12-31 19:02:14,327 INFO    MainThread:27200 [wandb_run.py:_redirect():2438] Wrapping output streams.
+2025-12-31 19:02:14,329 INFO    MainThread:27200 [wandb_run.py:_redirect():2461] Redirects installed.
+2025-12-31 19:02:14,340 INFO    MainThread:27200 [wandb_init.py:init():1081] run started, returning control to user process
+2025-12-31 19:02:43,013 INFO    MainThread:27200 [wandb_run.py:_finish():2287] finishing run Conscht-Sht/Hands-on-CV-Project2/jd639kqz
+2025-12-31 19:02:43,014 INFO    MainThread:27200 [wandb_run.py:_atexit_cleanup():2486] got exitcode: 0
+2025-12-31 19:02:43,017 INFO    MainThread:27200 [wandb_run.py:_restore():2468] restore
+2025-12-31 19:02:43,019 INFO    MainThread:27200 [wandb_run.py:_restore():2474] restore done
+2025-12-31 19:02:44,373 INFO    MainThread:27200 [wandb_run.py:_footer_sync_info():3862] logging synced files

@@ -1,0 +1,26 @@
+2025-12-31 19:04:07,774 INFO    MainThread:27200 [wandb_init.py:setup_run_log_directory():714] Logging user logs to g:\My Drive\Hands-on-CV-Project2\notebooks\wandb\run-20251231_190407-zvgp8bp8\logs\debug.log
+2025-12-31 19:04:07,780 INFO    MainThread:27200 [wandb_init.py:setup_run_log_directory():715] Logging internal logs to g:\My Drive\Hands-on-CV-Project2\notebooks\wandb\run-20251231_190407-zvgp8bp8\logs\debug-internal.log
+2025-12-31 19:04:07,780 INFO    MainThread:27200 [wandb_init.py:monkeypatch_ipython():633] configuring jupyter hooks <wandb.sdk.wandb_init._WandbInit object at 0x00000182C6919910>
+2025-12-31 19:04:07,780 INFO    MainThread:27200 [wandb_init.py:init():841] calling init triggers
+2025-12-31 19:04:07,785 INFO    MainThread:27200 [wandb_init.py:init():846] wandb.init called with sweep_config: {}
+config: {'_wandb': {}}
+2025-12-31 19:04:07,786 INFO    MainThread:27200 [wandb_init.py:init():889] starting backend
+2025-12-31 19:04:07,787 INFO    MainThread:27200 [wandb_init.py:init():892] sending inform_init request
+2025-12-31 19:04:07,805 INFO    MainThread:27200 [wandb_init.py:init():900] backend started and connected
+2025-12-31 19:04:07,822 INFO    MainThread:27200 [wandb_run.py:_label_probe_notebook():1334] probe notebook
+2025-12-31 19:04:07,993 INFO    MainThread:27200 [wandb_init.py:init():970] updated telemetry
+2025-12-31 19:04:08,258 INFO    MainThread:27200 [wandb_init.py:init():994] communicating run to backend with 90.0 second timeout
+2025-12-31 19:04:08,686 INFO    MainThread:27200 [wandb_init.py:init():1041] starting run threads in backend
+2025-12-31 19:04:10,361 INFO    MainThread:27200 [wandb_run.py:_console_start():2521] atexit reg
+2025-12-31 19:04:10,367 INFO    MainThread:27200 [wandb_run.py:_redirect():2369] redirect: wrap_raw
+2025-12-31 19:04:10,369 INFO    MainThread:27200 [wandb_run.py:_redirect():2438] Wrapping output streams.
+2025-12-31 19:04:10,370 INFO    MainThread:27200 [wandb_run.py:_redirect():2461] Redirects installed.
+2025-12-31 19:04:10,376 INFO    MainThread:27200 [wandb_init.py:init():1081] run started, returning control to user process
+2025-12-31 19:04:10,899 INFO    MainThread:27200 [wandb_run.py:_finish():2287] finishing run Conscht-Sht/cilp-extended-assessment/zvgp8bp8
+2025-12-31 19:04:10,906 INFO    MainThread:27200 [jupyter.py:save_history():435] not saving jupyter history
+2025-12-31 19:04:10,906 INFO    MainThread:27200 [jupyter.py:save_ipynb():359] not saving jupyter notebook
+2025-12-31 19:04:10,906 INFO    MainThread:27200 [wandb_init.py:_jupyter_teardown():618] cleaning up jupyter logic
+2025-12-31 19:04:10,908 INFO    MainThread:27200 [wandb_run.py:_atexit_cleanup():2486] got exitcode: 0
+2025-12-31 19:04:10,909 INFO    MainThread:27200 [wandb_run.py:_restore():2468] restore
+2025-12-31 19:04:10,912 INFO    MainThread:27200 [wandb_run.py:_restore():2474] restore done
+2025-12-31 19:04:11,918 INFO    MainThread:27200 [wandb_run.py:_footer_sync_info():3862] logging synced files

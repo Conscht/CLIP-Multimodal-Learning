@@ -1,0 +1,28 @@
+{
+  "os":  "Windows-10-10.0.26100-SP0",
+  "python":  "CPython 3.11.4",
+  "startedAt":  "2025-12-31T18:02:10.254402Z",
+  "program":  "g:\\My Drive\\Hands-on-CV-Project2\\notebooks\\04_final_assessmen.ipynb",
+  "codePath":  "g:\\My Drive\\Hands-on-CV-Project2\\notebooks\\04_final_assessmen.ipynb",
+  "codePathLocal":  "04_final_assessmen.ipynb",
+  "git":  {
+    "remote":  "https://github.com/Conscht/CLIP-Multimodal-Learning.git",
+    "commit":  "3b346fd8329232642d244b33d35ec9198a94b2cf"
+  },
+  "email":  "constantin.auga@gmx.de",
+  "root":  "g:\\My Drive\\Hands-on-CV-Project2\\notebooks",
+  "host":  "Conscht",
+  "executable":  "c:\\Users\\const\\anaconda3\\python.exe",
+  "cpu_count":  8,
+  "cpu_count_logical":  16,
+  "disk":  {
+    "/":  {
+      "total":  "510455517184",
+      "used":  "432440037376"
+    }
+  },
+  "memory":  {
+    "total":  "16542097408"
+  },
+  "writerId":  "cvb6vvx82xuz6aidwwio8t26pr7r7wad"
+}
