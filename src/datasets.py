@@ -214,3 +214,13 @@ def build_grouped_dataset(name: str, pairs, group_field="group", overwrite=True)
 
     ds.save()
     return ds
+
+def make_loaders(root: Path, frac=0.1, seed=42, val_ratio=0.2, batch_size=64, num_workers=2):
+    pairs = AssessmentPairs(root).load_pairs()
+    sub = stratified_subsample(pairs, frac=frac, seed=seed)
+    train_pairs, val_pairs = train_val_split(sub, val_ratio=val_ratio, seed=seed)
+    train_ds = AssessmentTorchDataset(train_pairs)
+    val_ds = AssessmentTorchDataset(val_pairs)
+    train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=True)
+    val_loader = DataLoader(val_ds, batch_size=batch_size, shuffle=False, num_workers=num_workers, pin_memory=True)
+    return pairs, sub, train_pairs, val_pairs, train_loader, val_loader

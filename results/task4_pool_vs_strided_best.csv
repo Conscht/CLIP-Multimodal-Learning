@@ -1,0 +1,3 @@
+model,pool_type,ckpt_path,val_loss_final,val_f1_final,params,sec_per_epoch_avg,gpu_mem_mb_peak
+intermediate_hadamard,maxpool,checkpoints/task4_maxpool_intermediate_hadamard.pt,0.008465380489360541,0.9949848291080519,699236,10.941423547267913,498.85498046875
+intermediate_concat,strided,checkpoints/task4_strided_intermediate_concat.pt,0.22854112029075624,0.9033669006204862,879236,11.10816044807434,105.13671875

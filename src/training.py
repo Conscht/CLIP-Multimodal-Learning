@@ -1,8 +1,65 @@
 import time
 import torch
 import torch.nn as nn
+from pathlib import Path
 import numpy as np
 from sklearn.metrics import f1_score
+
+import numpy as np
+import torch
+import wandb
+
+
+@torch.no_grad()
+def log_sample_predictions(model, loader, device, wandb_run, *, n=5, class_names=("cube", "sphere")):
+    """
+    Logs at least n sample predictions to W&B as a table.
+    Uses RGB image visualization; also logs LiDAR as a grayscale image.
+    """
+    model.eval()
+
+    rows = []
+    # get a single batch
+    batch = next(iter(loader))
+    rgb = batch["rgb"].to(device)
+    lidar = batch["lidar"].to(device)
+    y = batch["y"].to(device)
+
+    logits = model(rgb, lidar)
+    pred = torch.argmax(logits, dim=1)
+
+    n = min(n, rgb.shape[0])
+
+    for i in range(n):
+        # RGB: assume [C,H,W] float in [0,1], C can be 3 or 4
+        rgb_i = rgb[i].detach().cpu().float()
+        rgb_i = rgb_i[:3]  # take first 3 channels if RGBA
+        rgb_img = (rgb_i.permute(1, 2, 0).numpy() * 255).astype(np.uint8)
+
+        # LiDAR: visualize first channel as grayscale
+        li = lidar[i].detach().cpu().float()
+        if li.ndim == 3:
+            li0 = li[0]
+        else:
+            li0 = li
+        li0 = li0.numpy()
+        lo, hi = np.percentile(li0, [1, 99])
+        li0 = np.clip((li0 - lo) / (hi - lo + 1e-6), 0, 1)
+        lidar_img = (li0 * 255).astype(np.uint8)
+
+        y_true = int(y[i].item())
+        y_pred = int(pred[i].item())
+
+        rows.append([
+            wandb.Image(rgb_img, caption="RGB"),
+            wandb.Image(lidar_img, caption="LiDAR"),
+            class_names[y_true],
+            class_names[y_pred],
+        ])
+
+    table = wandb.Table(columns=["rgb", "lidar", "y_true", "y_pred"], data=rows)
+    wandb_run.log({"samples/predictions": table})
+
 
 def count_params(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
@@ -37,7 +94,7 @@ def evaluate_loss_and_f1(model, loader, device):
     f1 = float(f1_score(y_all, p_all, average="macro")) if len(y_all) else 0.0
     return total / max(n, 1), f1
 
-def train_task3(model, train_loader, val_loader, *, device, epochs=10, lr=1e-3, wandb_run=None):
+def train_task3(model, train_loader, val_loader, *, device, epochs=10, lr=1e-3, wandb_run=None, ckpt_path: str):
     model = model.to(device)
     opt = torch.optim.AdamW(model.parameters(), lr=lr)
     ce = nn.CrossEntropyLoss()
@@ -54,7 +111,7 @@ def train_task3(model, train_loader, val_loader, *, device, epochs=10, lr=1e-3, 
 
     epoch_times, peak_mems = [], []
     train_losses, val_losses, val_f1s = [], [], []
-
+    best_val = None
     for ep in range(1, epochs + 1):
         if torch.cuda.is_available():
             torch.cuda.reset_peak_memory_stats()
@@ -75,7 +132,19 @@ def train_task3(model, train_loader, val_loader, *, device, epochs=10, lr=1e-3, 
 
         tr_loss = total / max(n, 1)
         va_loss, va_f1 = evaluate_loss_and_f1(model, val_loader, device)
-
+        if ckpt_path is not None and (best_val is None or va_loss < best_val):
+            best_val = va_loss
+            Path(ckpt_path).parent.mkdir(parents=True, exist_ok=True)
+            torch.save(
+                {
+                    "epoch": ep,
+                    "model_state_dict": model.state_dict(),
+                    "optimizer_state_dict": opt.state_dict(),
+                    "val_loss": va_loss,
+                    "val_f1": va_f1,
+                },
+                ckpt_path,
+            )
         dt = time.time() - t0
         mem = (torch.cuda.max_memory_allocated() / (1024**2)) if torch.cuda.is_available() else 0.0
 
@@ -119,5 +188,161 @@ def train_task3(model, train_loader, val_loader, *, device, epochs=10, lr=1e-3, 
             "gpu_mem_mb_peak": summary["gpu_mem_mb_peak"],
             "params": summary["params"],
         })
+    if wandb_run is not None:
+        log_sample_predictions(model, val_loader, device, wandb_run, n=5)
 
     return summary
+
+import matplotlib.pyplot as plt
+
+def train_cilp(model, train_loader, val_loader, *, device, epochs=20, lr=1e-3, wandb_run=None):
+    model = model.to(device)
+    opt = torch.optim.AdamW(model.parameters(), lr=lr)
+
+    def eval_loader(loader):
+        model.eval()
+        total, n = 0.0, 0
+        with torch.no_grad():
+            for batch in loader:
+                rgb = batch["rgb"].to(device)
+                lidar = batch["lidar"].to(device)
+                logits = model(rgb, lidar)
+                loss = clip_contrastive_loss(logits)
+                bs = rgb.size(0)
+                total += loss.item() * bs
+                n += bs
+        return total / max(n, 1)
+
+    for ep in range(1, epochs + 1):
+        model.train()
+        total, n = 0.0, 0
+        for batch in train_loader:
+            rgb = batch["rgb"].to(device)
+            lidar = batch["lidar"].to(device)
+            opt.zero_grad(set_to_none=True)
+            logits = model(rgb, lidar)
+            loss = clip_contrastive_loss(logits)
+            loss.backward()
+            opt.step()
+            bs = rgb.size(0)
+            total += loss.item() * bs
+            n += bs
+
+        tr = total / max(n, 1)
+        va = eval_loader(val_loader)
+
+        if wandb_run is not None:
+            wandb_run.log({"epoch": ep, "train/contrastive_loss": tr, "val/contrastive_loss": va, "lr": lr})
+
+        print(f"epoch {ep:02d} | train {tr:.4f} | val {va:.4f}")
+
+    # Log similarity matrix on one validation batch
+    batch = next(iter(val_loader))
+    rgb = batch["rgb"].to(device)
+    lidar = batch["lidar"].to(device)
+    with torch.no_grad():
+        S = model(rgb, lidar).detach().cpu().numpy()
+
+    plt.figure()
+    plt.imshow(S, aspect="auto")
+    plt.title("RGB-LiDAR similarity matrix (val batch)")
+    plt.xlabel("LiDAR")
+    plt.ylabel("RGB")
+    if wandb_run is not None:
+        wandb_run.log({"similarity_matrix": wandb.Image(plt.gcf())})
+    plt.show()
+
+    return model
+
+
+def train_projector(cilp, projector, train_loader, val_loader, *, device, epochs=20, lr=1e-3, wandb_run=None):
+    cilp.eval()  # freeze encoders
+    projector = projector.to(device)
+    opt = torch.optim.AdamW(projector.parameters(), lr=lr)
+    mse = nn.MSELoss()
+
+    def step(loader, train=False):
+        total, n = 0.0, 0
+        if train: projector.train()
+        else: projector.eval()
+        for batch in loader:
+            rgb = batch["rgb"].to(device)
+            lidar = batch["lidar"].to(device)
+            with torch.no_grad():
+                z_rgb = cilp.rgb(rgb)
+                z_lid = cilp.lidar(lidar)
+            pred = projector(z_rgb)
+            loss = mse(pred, z_lid)
+            if train:
+                opt.zero_grad(set_to_none=True)
+                loss.backward()
+                opt.step()
+            total += loss.item() * rgb.size(0)
+            n += rgb.size(0)
+        return total / max(n, 1)
+
+    for ep in range(1, epochs+1):
+        tr = step(train_loader, train=True)
+        va = step(val_loader, train=False)
+        if wandb_run is not None:
+            wandb_run.log({"epoch": ep, "train/projector_mse": tr, "val/projector_mse": va})
+        print(f"epoch {ep:02d} | train mse {tr:.4f} | val mse {va:.4f}")
+
+    return projector
+
+from sklearn.metrics import accuracy_score
+
+def train_embedding_classifier(cilp, proj, clf, train_loader, val_loader, *, device, epochs=10, lr=1e-3, wandb_run=None):
+    cilp.eval()
+    proj.eval()
+    clf = clf.to(device)
+    opt = torch.optim.AdamW(clf.parameters(), lr=lr)
+    ce = nn.CrossEntropyLoss()
+
+    @torch.no_grad()
+    def eval_acc(loader):
+        clf.eval()
+        ys, ps = [], []
+        total, n = 0.0, 0
+        for batch in loader:
+            rgb = batch["rgb"].to(device)
+            y = batch["y"].to(device)
+            z = cilp.rgb(rgb)
+            z_hat = proj(z)
+            logits = clf(z_hat)
+            loss = ce(logits, y)
+            total += loss.item() * y.size(0)
+            n += y.size(0)
+            pred = torch.argmax(logits, dim=1)
+            ys.append(y.cpu().numpy())
+            ps.append(pred.cpu().numpy())
+        ys = np.concatenate(ys)
+        ps = np.concatenate(ps)
+        return total / max(n,1), float(accuracy_score(ys, ps))
+
+    for ep in range(1, epochs+1):
+        clf.train()
+        total, n = 0.0, 0
+        for batch in train_loader:
+            rgb = batch["rgb"].to(device)
+            y = batch["y"].to(device)
+            with torch.no_grad():
+                z = cilp.rgb(rgb)
+                z_hat = proj(z)
+            logits = clf(z_hat)
+            loss = ce(logits, y)
+            opt.zero_grad(set_to_none=True)
+            loss.backward()
+            opt.step()
+            total += loss.item() * y.size(0)
+            n += y.size(0)
+
+        tr = total / max(n,1)
+        va_loss, va_acc = eval_acc(val_loader)
+
+        if wandb_run is not None:
+            wandb_run.log({"epoch": ep, "train/clf_loss": tr, "val/clf_loss": va_loss, "val/acc": va_acc})
+
+        print(f"epoch {ep:02d} | train {tr:.4f} | val {va_loss:.4f} | acc {va_acc:.4f}")
+
+    return clf

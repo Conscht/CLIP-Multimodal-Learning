@@ -1,0 +1,9 @@
+model,pool_type,ckpt_path,val_loss_final,val_f1_final,params,sec_per_epoch_avg,gpu_mem_mb_peak
+late_fusion,maxpool,checkpoints/task4_maxpool_late_fusion.pt,0.02247535586357117,0.992479270990668,1305536,11.444954049587249,527.56689453125
+intermediate_concat,maxpool,checkpoints/task4_maxpool_intermediate_concat.pt,0.09251662597060203,0.9698067632850241,879236,11.23054713010788,667.48876953125
+intermediate_add,maxpool,checkpoints/task4_maxpool_intermediate_add.pt,0.16855820998549462,0.9497878536818056,699236,10.990930533409118,486.09912109375
+intermediate_hadamard,maxpool,checkpoints/task4_maxpool_intermediate_hadamard.pt,0.008465380489360541,0.9949848291080519,699236,10.941423547267913,498.85498046875
+late_fusion,strided,checkpoints/task4_strided_late_fusion.pt,0.2568501949310303,0.903612012987013,1305536,11.184368121623994,101.00146484375
+intermediate_concat,strided,checkpoints/task4_strided_intermediate_concat.pt,0.22854112029075624,0.9033669006204862,879236,11.10816044807434,105.13671875
+intermediate_add,strided,checkpoints/task4_strided_intermediate_add.pt,0.2828994166851044,0.8791266903376898,699236,10.903355538845062,95.5126953125
+intermediate_hadamard,strided,checkpoints/task4_strided_intermediate_hadamard.pt,0.2970290660858154,0.8848213771524005,699236,10.801840126514435,95.5126953125
