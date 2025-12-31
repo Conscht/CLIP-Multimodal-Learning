@@ -1,0 +1,12 @@
+{"time":"2025-12-31T18:51:32.2609642+01:00","level":"INFO","msg":"stream: starting","core version":"0.23.1"}
+{"time":"2025-12-31T18:51:32.6244513+01:00","level":"INFO","msg":"stream: created new stream","id":"ian6prfj"}
+{"time":"2025-12-31T18:51:32.6266866+01:00","level":"INFO","msg":"handler: started","stream_id":"ian6prfj"}
+{"time":"2025-12-31T18:51:32.6676031+01:00","level":"INFO","msg":"writer: started","stream_id":"ian6prfj"}
+{"time":"2025-12-31T18:51:32.6688039+01:00","level":"INFO","msg":"sender: started","stream_id":"ian6prfj"}
+{"time":"2025-12-31T18:51:32.6688039+01:00","level":"INFO","msg":"stream: started","id":"ian6prfj"}
+{"time":"2025-12-31T18:51:36.7366455+01:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-12-31T18:51:36.989447+01:00","level":"INFO","msg":"handler: operation stats","stats":{}}
+{"time":"2025-12-31T18:51:37.0077951+01:00","level":"INFO","msg":"stream: closing","id":"ian6prfj"}
+{"time":"2025-12-31T18:51:37.0084719+01:00","level":"INFO","msg":"handler: closed","stream_id":"ian6prfj"}
+{"time":"2025-12-31T18:51:37.0231887+01:00","level":"INFO","msg":"sender: closed","stream_id":"ian6prfj"}
+{"time":"2025-12-31T18:51:37.0231887+01:00","level":"INFO","msg":"stream: closed","id":"ian6prfj"}

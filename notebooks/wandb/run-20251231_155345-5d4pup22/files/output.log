@@ -1,0 +1,23 @@
+loss1: 3.4657914638519287 max|grad|: 0.0026178243570029736
+max mean |Δw|: 0.0009999275207519531
+loss2: 3.465756416320801
+epoch 01 | train 3.4520 | val 3.3981
+epoch 02 | train 3.3967 | val 3.2909
+epoch 03 | train 3.1860 | val 3.1332
+epoch 04 | train 3.0239 | val 3.0198
+epoch 05 | train 2.9560 | val 2.9229
+epoch 06 | train 2.8548 | val 2.8096
+epoch 07 | train 2.7159 | val 2.9039
+epoch 08 | train 2.4743 | val 2.5498
+epoch 09 | train 2.3400 | val 2.4068
+epoch 10 | train 2.2271 | val 2.6970
+epoch 11 | train 2.1645 | val 2.2617
+epoch 12 | train 2.0345 | val 2.1690
+epoch 13 | train 1.9370 | val 2.2070
+epoch 14 | train 1.8426 | val 2.0336
+epoch 15 | train 1.6993 | val 2.1305
+epoch 16 | train 1.5254 | val 1.6627
+epoch 17 | train 1.2064 | val 1.7565
+epoch 18 | train 1.2513 | val 1.8394
+epoch 19 | train 0.9991 | val 1.5257
+epoch 20 | train 0.8661 | val 1.5236

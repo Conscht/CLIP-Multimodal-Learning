@@ -1,0 +1,1 @@
+{"columns": ["rgb", "lidar", "y_true", "y_pred", "conf"], "data": [["Image", "Image", "sphere", "sphere", 0.9999978542327881], ["Image", "Image", "cube", "cube", 0.9991852641105652], ["Image", "Image", "sphere", "sphere", 0.9970687031745911], ["Image", "Image", "cube", "cube", 0.9999942779541016], ["Image", "Image", "cube", "cube", 0.9981227517127991]]}

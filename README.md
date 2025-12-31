@@ -6,6 +6,8 @@ This project investigates **multimodal classification** using paired **RGB image
 
 The work is organized according to the assessment tasks: dataset handling + visualization (Tasks 1–2), fusion architectures (Task 3), and pooling comparison (Task 4).
 
+You can find the wandb project here:
+https://wandb.ai/Conscht-Sht/cilp-extended-assessment?nw=nwuserconstantinauga
 ---
 
 ## Dataset Structure
