@@ -185,7 +185,6 @@ def build_grouped_dataset(name: str, pairs, group_field="group", overwrite=True)
     preview_dir = Path("/content/lidar_previews")  # fast local previews in Colab
 
     for p in pairs:
-        # make LiDAR preview PNG for the App
         lidar_png = lidar_to_png(p.lidar_path, preview_dir)
 
         rgb = fo.Sample(

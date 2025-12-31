@@ -274,17 +274,23 @@ def build_fusion_model(
 # Task 5 components (ok)
 # -------------------------
 
+import math
+import torch
+import torch.nn as nn
+
 class CILP(nn.Module):
     def __init__(self, embedder_rgb: nn.Module, embedder_lidar: nn.Module, temperature: float = 0.07):
         super().__init__()
         self.rgb = embedder_rgb
         self.lidar = embedder_lidar
-        self.temperature = temperature
+        # CLIP learns logit scale; init to 1/T
+        self.logit_scale = nn.Parameter(torch.tensor(math.log(1.0 / temperature), dtype=torch.float32))
 
     def forward(self, rgb, lidar):
         z_rgb = self.rgb(rgb)
         z_lid = self.lidar(lidar)
-        return (z_rgb @ z_lid.t()) / self.temperature
+        scale = self.logit_scale.exp().clamp(1.0, 100.0)
+        return (z_rgb @ z_lid.t()) * scale
 
 
 class Projector(nn.Module):

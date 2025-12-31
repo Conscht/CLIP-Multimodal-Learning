@@ -9,6 +9,10 @@ import numpy as np
 import torch
 import wandb
 
+import torch
+import torch.nn.functional as F
+
+
 
 @torch.no_grad()
 def log_sample_predictions(model, loader, device, wandb_run, *, n=5, class_names=("cube", "sphere")):
@@ -197,33 +201,39 @@ import matplotlib.pyplot as plt
 
 def train_cilp(model, train_loader, val_loader, *, device, epochs=20, lr=1e-3, wandb_run=None):
     model = model.to(device)
-    opt = torch.optim.AdamW(model.parameters(), lr=lr)
+    for p in model.parameters():
+        p.requires_grad = True
 
+    opt = torch.optim.Adam(model.parameters(), lr=lr)  # <- Adam (no weight decay)
+
+    @torch.no_grad()
     def eval_loader(loader):
         model.eval()
         total, n = 0.0, 0
-        with torch.no_grad():
-            for batch in loader:
-                rgb = batch["rgb"].to(device)
-                lidar = batch["lidar"].to(device)
-                logits = model(rgb, lidar)
-                loss = clip_contrastive_loss(logits)
-                bs = rgb.size(0)
-                total += loss.item() * bs
-                n += bs
+        for batch in loader:
+            rgb = batch["rgb"].to(device).float()
+            lidar = batch["lidar"].to(device).float()
+            logits = model(rgb, lidar)
+            loss = clip_contrastive_loss(logits)
+            bs = rgb.size(0)
+            total += loss.item() * bs
+            n += bs
         return total / max(n, 1)
 
     for ep in range(1, epochs + 1):
         model.train()
         total, n = 0.0, 0
+
         for batch in train_loader:
-            rgb = batch["rgb"].to(device)
-            lidar = batch["lidar"].to(device)
+            rgb = batch["rgb"].to(device).float()
+            lidar = batch["lidar"].to(device).float()
+
             opt.zero_grad(set_to_none=True)
             logits = model(rgb, lidar)
             loss = clip_contrastive_loss(logits)
             loss.backward()
             opt.step()
+
             bs = rgb.size(0)
             total += loss.item() * bs
             n += bs
@@ -232,25 +242,14 @@ def train_cilp(model, train_loader, val_loader, *, device, epochs=20, lr=1e-3, w
         va = eval_loader(val_loader)
 
         if wandb_run is not None:
-            wandb_run.log({"epoch": ep, "train/contrastive_loss": tr, "val/contrastive_loss": va, "lr": lr})
+            wandb_run.log({
+                "epoch": ep,
+                "train/contrastive_loss": tr,
+                "val/contrastive_loss": va,
+                "lr": opt.param_groups[0]["lr"],
+            })
 
         print(f"epoch {ep:02d} | train {tr:.4f} | val {va:.4f}")
-
-    # Log similarity matrix on one validation batch
-    batch = next(iter(val_loader))
-    rgb = batch["rgb"].to(device)
-    lidar = batch["lidar"].to(device)
-    with torch.no_grad():
-        S = model(rgb, lidar).detach().cpu().numpy()
-
-    plt.figure()
-    plt.imshow(S, aspect="auto")
-    plt.title("RGB-LiDAR similarity matrix (val batch)")
-    plt.xlabel("LiDAR")
-    plt.ylabel("RGB")
-    if wandb_run is not None:
-        wandb_run.log({"similarity_matrix": wandb.Image(plt.gcf())})
-    plt.show()
 
     return model
 
@@ -346,3 +345,17 @@ def train_embedding_classifier(cilp, proj, clf, train_loader, val_loader, *, dev
         print(f"epoch {ep:02d} | train {tr:.4f} | val {va_loss:.4f} | acc {va_acc:.4f}")
 
     return clf
+
+
+def clip_contrastive_loss(logits: torch.Tensor) -> torch.Tensor:
+    """
+    CLIP-style symmetric contrastive loss.
+    logits: [B, B] where logits[i, j] = sim(rgb_i, lidar_j) / T
+    Positive pairs are on the diagonal.
+    """
+    B = logits.size(0)
+    targets = torch.arange(B, device=logits.device)
+
+    loss_i2t = F.cross_entropy(logits, targets)        # rgb -> lidar
+    loss_t2i = F.cross_entropy(logits.t(), targets)    # lidar -> rgb
+    return 0.5 * (loss_i2t + loss_t2i)
